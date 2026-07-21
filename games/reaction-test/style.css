@@ -1,0 +1,76 @@
+/* 반응속도 테스트 전용 스타일 (공통 패널/통계/결과 UI는 assets/css/common.css 참고) */
+
+.reaction-app {
+  margin-top: 1rem;
+}
+
+.reaction-stage {
+  min-height: 320px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.5rem;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition: background 0.08s ease;
+  border: 1px solid var(--border);
+}
+
+.stage-text {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+/* 대기 전 (아이들) */
+.reaction-stage.state-idle {
+  background: var(--bg);
+}
+
+.reaction-stage.state-idle .stage-text {
+  color: var(--fg);
+}
+
+/* 빨간색: 기다리는 중 */
+.reaction-stage.state-waiting {
+  background: #d6293f;
+}
+
+/* 초록색: 지금 클릭! */
+.reaction-stage.state-ready {
+  background: #1f9d55;
+}
+
+/* 성급하게 눌렀을 때 */
+.reaction-stage.state-early {
+  background: #e08a1e;
+}
+
+/* 라운드 결과(짧게 표시) */
+.reaction-stage.state-round-result {
+  background: var(--accent);
+}
+
+.reaction-stage.state-round-result .stage-text {
+  font-size: 2.2rem;
+}
+
+/* ---------- 모바일 반응형 ---------- */
+@media (max-width: 480px) {
+  .reaction-stage {
+    min-height: 260px;
+  }
+
+  .stage-text {
+    font-size: 1.1rem;
+  }
+
+  .reaction-stage.state-round-result .stage-text {
+    font-size: 1.8rem;
+  }
+}

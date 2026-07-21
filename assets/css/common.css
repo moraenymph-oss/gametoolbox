@@ -353,6 +353,96 @@ main {
   font-weight: 600;
 }
 
+/* ---------- 게임 공통 UI (패널/통계바/결과화면) ---------- */
+.panel {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+.stat-bar {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.btn-sm {
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+}
+
+.stat-bar .btn-sm {
+  margin-left: auto;
+}
+
+.hint {
+  margin: 0.7rem 0 0;
+  font-size: 0.82rem;
+  color: var(--fg-muted);
+  text-align: center;
+}
+
+.result-panel {
+  text-align: center;
+}
+
+.result-title {
+  margin: 0 0 1.2rem;
+  font-size: 1.4rem;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.9rem;
+  margin-bottom: 0.4rem;
+}
+
+.result-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.result-value {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.result-label {
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+}
+
 /* ---------- 반응형 ---------- */
 @media (max-width: 480px) {
   .page-title {
@@ -366,5 +456,19 @@ main {
   .footer-inner {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .panel {
+    padding: 1.1rem;
+  }
+
+  .stat-bar .btn-sm {
+    order: 3;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .result-grid {
+    grid-template-columns: 1fr;
   }
 }
