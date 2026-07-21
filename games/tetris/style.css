@@ -1,0 +1,71 @@
+/* 블록 쌓기 게임(테트리스 스타일) 전용 스타일 (공통 아케이드/패널/결과 UI는 assets/css/common.css 참고) */
+
+.tetris-layout {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.tetris-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  align-items: center;
+}
+
+.next-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.6rem;
+  text-align: center;
+}
+
+.next-box .stat-label {
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+#next-canvas {
+  display: block;
+  background: #0d1117;
+  border-radius: 8px;
+}
+
+.tetris-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 46px);
+  grid-template-rows: repeat(2, 46px);
+  gap: 6px;
+}
+
+.tetris-pad button {
+  border: 1.5px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--fg);
+  border-radius: 10px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.tetris-pad button:active {
+  background: var(--border);
+}
+
+.pad-left { grid-column: 1; grid-row: 1; }
+.pad-rotate { grid-column: 2; grid-row: 1; }
+.pad-right { grid-column: 3; grid-row: 1; }
+.pad-down { grid-column: 1 / span 2; grid-row: 2; }
+.pad-drop { grid-column: 3; grid-row: 2; font-size: 0.85rem; }
+
+@media (max-width: 480px) {
+  .tetris-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+}

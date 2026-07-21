@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>우주 슈팅 게임 (갤러그 스타일) - 무료 온라인 게임 | GameToolbox</title>
+<meta name="description" content="마우스·터치·방향키로 우주선을 움직여 자동으로 총알을 발사하는 갤러그 스타일 우주 슈팅 게임. 웨이브가 올라갈수록 적이 늘어나는 난이도에 도전해보세요." />
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/css/common.css" />
+<link rel="stylesheet" href="games/shooter/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="nav-brand">🎮 GameToolbox</a>
+    <div class="nav-links">
+      <a href="index.html">홈</a>
+      <a href="about.html">소개</a>
+      <a href="privacy.html">개인정보처리방침</a>
+      <a href="https://moraenymph-oss.github.io/devtoolbox/" class="external" target="_blank" rel="noopener">🛠️ 개발 유틸 도구 보러가기</a>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="다크모드 전환">🌙</button>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <h1 class="page-title">🚀 우주 슈팅 게임</h1>
+  <p class="page-desc">우주선을 움직여 자동으로 총알을 발사하며 밀려오는 적 편대를 막아내세요.</p>
+
+  <section id="shooter-game" class="arcade-app">
+    <div class="panel">
+      <div class="stat-bar arcade-controls">
+        <div class="stat">
+          <span class="stat-label">점수</span>
+          <span id="score-value" class="stat-value">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">목숨</span>
+          <span id="lives-value" class="stat-value">3</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">웨이브</span>
+          <span id="wave-value" class="stat-value">1</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">최고 점수</span>
+          <span id="best-value" class="stat-value">0</span>
+        </div>
+        <button type="button" id="restart-btn-top" class="btn btn-outline btn-sm">🔄 다시 하기</button>
+      </div>
+
+      <div id="arcade-wrap" class="arcade-wrap">
+        <canvas id="game-canvas" class="arcade-screen"></canvas>
+        <div id="arcade-overlay" class="game-overlay" hidden>
+          <div class="overlay-card">
+            <h3 id="overlay-title">결과</h3>
+            <p id="overlay-desc"></p>
+            <div class="ad-slot">광고 영역 (Google AdSense 등)</div>
+            <div id="overlay-actions" class="overlay-actions"></div>
+          </div>
+        </div>
+      </div>
+
+      <p class="hint">💡 마우스·터치·방향키로 좌우 이동하세요. 총알은 자동으로 발사됩니다.</p>
+    </div>
+  </section>
+
+  <section class="info-section">
+    <h2>우주 슈팅 게임(갤러그 스타일) 하는법 &amp; 공략 팁</h2>
+    <p>
+      이 우주 슈팅 게임은 1980년대 갤러그, 스페이스 인베이더 같은 고전 슈팅 게임에서 영감을 받은 웨이브 서바이벌
+      방식입니다. 우주선은 좌우로만 움직이면 되고, 총알은 자동으로 계속 발사되기 때문에 조작은 단순하지만 화면
+      위에서 좌우로 움직이며 서서히 내려오는 적 편대를 얼마나 잘 피하고 격추하느냐가 실력을 가릅니다. 적 편대를
+      모두 격추하면 다음 웨이브로 넘어가며, 웨이브가 올라갈수록 적의 수가 많아지고 이동 속도와 사격 빈도도 함께
+      빨라집니다. 적의 총알에 맞거나 적 편대가 기지 근처까지 내려오면 목숨을 잃거나 즉시 게임이 종료되므로,
+      화면 하단까지 내려오도록 방치하지 않는 것이 중요합니다. 공략 팁으로는, 화면 가장자리보다는 중앙 부근에서
+      좌우로 움직이며 적의 총알을 피할 공간을 항상 확보해두는 것이 좋습니다. 또한 적 편대는 한쪽 끝에 닿으면
+      방향을 바꾸면서 한 칸씩 내려오기 때문에, 편대가 가장자리에 몰려 있을 때 미리 반대편으로 이동해두면 다음
+      방향 전환 타이밍에 유리한 위치를 선점할 수 있습니다. 목숨을 잃은 직후에는 잠깐 무적 상태(우주선이 깜빡임)가
+      되므로, 이 틈을 이용해 위험한 구간을 빠르게 빠져나가는 것도 좋은 전략입니다.
+    </p>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>&copy; 2026 GameToolbox</span>
+    <div class="footer-links">
+      <a href="about.html">소개</a>
+      <a href="privacy.html">개인정보처리방침</a>
+      <a href="https://moraenymph-oss.github.io/devtoolbox/" class="external" target="_blank" rel="noopener">🛠️ 개발 유틸 도구 보러가기</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/common.js"></script>
+<script src="games/shooter/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>블록 쌓기 게임 (테트리스 스타일) - 무료 온라인 게임 | GameToolbox</title>
+<meta name="description" content="떨어지는 블록을 쌓고 줄을 채워 없애는 무료 온라인 블록 쌓기 게임(테트리스 스타일). 방향키 또는 모바일 버튼으로 조작하며 레벨이 오를수록 속도가 빨라집니다." />
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/css/common.css" />
+<link rel="stylesheet" href="games/tetris/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="nav-brand">🎮 GameToolbox</a>
+    <div class="nav-links">
+      <a href="index.html">홈</a>
+      <a href="about.html">소개</a>
+      <a href="privacy.html">개인정보처리방침</a>
+      <a href="https://moraenymph-oss.github.io/devtoolbox/" class="external" target="_blank" rel="noopener">🛠️ 개발 유틸 도구 보러가기</a>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="다크모드 전환">🌙</button>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <h1 class="page-title">🧊 블록 쌓기 게임</h1>
+  <p class="page-desc">떨어지는 블록을 움직이고 회전시켜 가로줄을 가득 채우면 줄이 사라집니다.</p>
+
+  <section id="tetris-game" class="arcade-app">
+    <div class="panel">
+      <div class="stat-bar arcade-controls">
+        <div class="stat">
+          <span class="stat-label">점수</span>
+          <span id="score-value" class="stat-value">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">줄</span>
+          <span id="lines-value" class="stat-value">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">레벨</span>
+          <span id="level-value" class="stat-value">1</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">최고 점수</span>
+          <span id="best-value" class="stat-value">0</span>
+        </div>
+        <button type="button" id="restart-btn-top" class="btn btn-outline btn-sm">🔄 다시 하기</button>
+      </div>
+
+      <div class="tetris-layout">
+        <div id="arcade-wrap" class="arcade-wrap">
+          <canvas id="game-canvas" class="arcade-screen"></canvas>
+          <div id="arcade-overlay" class="game-overlay" hidden>
+            <div class="overlay-card">
+              <h3 id="overlay-title">결과</h3>
+              <p id="overlay-desc"></p>
+              <div class="ad-slot">광고 영역 (Google AdSense 등)</div>
+              <div id="overlay-actions" class="overlay-actions"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tetris-side">
+          <div class="next-box">
+            <span class="stat-label">다음 블록</span>
+            <canvas id="next-canvas"></canvas>
+          </div>
+
+          <div class="tetris-pad">
+            <button type="button" id="pad-left" class="pad-left" aria-label="왼쪽 이동">◀</button>
+            <button type="button" id="pad-rotate" class="pad-rotate" aria-label="회전">↻</button>
+            <button type="button" id="pad-right" class="pad-right" aria-label="오른쪽 이동">▶</button>
+            <button type="button" id="pad-down" class="pad-down" aria-label="소프트 드롭">⬇</button>
+            <button type="button" id="pad-drop" class="pad-drop" aria-label="하드 드롭">⤓끝</button>
+          </div>
+        </div>
+      </div>
+
+      <p class="hint">💡 방향키로 이동·회전(↑)·소프트드롭(↓), 스페이스바로 즉시 떨어뜨리기. 모바일은 아래 버튼을 사용하세요.</p>
+    </div>
+  </section>
+
+  <section class="info-section">
+    <h2>블록 쌓기 게임(테트리스 스타일) 하는법 &amp; 전략 팁</h2>
+    <p>
+      이 블록 쌓기 게임은 위에서 떨어지는 7가지 모양의 블록(테트로미노)을 좌우로 옮기고 회전시켜 바닥에 쌓는
+      고전 퍼즐 게임입니다. 가로 한 줄이 빈틈없이 블록으로 채워지면 그 줄은 사라지면서 점수를 얻고, 여러 줄을
+      한 번에 없앨수록 훨씬 높은 점수를 얻을 수 있습니다. 블록이 화면 맨 위까지 쌓여 더 이상 새 블록을 놓을
+      공간이 없으면 게임이 종료됩니다. 테트리스 스타일 게임을 잘하는 핵심 전략은 줄을 세우기보다 평평하게
+      쌓는 것입니다. 특정 열에만 블록이 높이 쌓이면 나중에 구멍을 메우기 어려워지므로, 항상 보드 전체를
+      고르게 채운다는 느낌으로 블록을 배치하는 것이 좋습니다. 또한 아래쪽 화면에 표시되는 다음 블록 미리보기를
+      확인하면서 지금 놓는 블록뿐 아니라 다음 블록까지 고려해 자리를 잡아두면 훨씬 효율적으로 줄을 채울 수
+      있습니다. 긴 막대 모양 블록(I자 블록)은 아껴두었다가 네 줄을 한 번에 없애는 데 사용하면 가장 높은
+      점수를 얻을 수 있습니다. 레벨이 오를수록 블록이 떨어지는 속도가 빨라지므로, 초반에 안정적으로 쌓는
+      연습을 충분히 해두는 것이 고득점의 지름길입니다.
+    </p>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>&copy; 2026 GameToolbox</span>
+    <div class="footer-links">
+      <a href="about.html">소개</a>
+      <a href="privacy.html">개인정보처리방침</a>
+      <a href="https://moraenymph-oss.github.io/devtoolbox/" class="external" target="_blank" rel="noopener">🛠️ 개발 유틸 도구 보러가기</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/common.js"></script>
+<script src="games/tetris/script.js"></script>
+</body>
+</html>
