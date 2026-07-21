@@ -121,6 +121,7 @@
 
   function finishGame(typedRaw) {
     finished = true;
+    GTBSfx.win();
     stopTimerLoop();
     input.readOnly = true;
 

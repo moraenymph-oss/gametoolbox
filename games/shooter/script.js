@@ -27,11 +27,37 @@
   canvas.width = W;
   canvas.height = H;
 
-  var ship, enemies, playerBullets, enemyBullets;
+  var ship, enemies, playerBullets, enemyBullets, particles;
   var group, score, lives, wave, state, rafId, lastTime;
   var fireTimer = 0, enemyFireTimer = 0, invulnTimer = 0, edgeCooldown = 0;
   var best = Number(localStorage.getItem(BEST_KEY) || 0);
   var leftPressed = false, rightPressed = false;
+
+  var stars = (function () {
+    var arr = [];
+    for (var i = 0; i < 40; i++) {
+      arr.push({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.2 + 0.4, speed: 22 + Math.random() * 18 });
+    }
+    for (var j = 0; j < 22; j++) {
+      arr.push({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.6 + 1.2, speed: 46 + Math.random() * 30 });
+    }
+    return arr;
+  })();
+
+  function spawnExplosion(x, y, color) {
+    for (var i = 0; i < 9; i++) {
+      var angle = Math.random() * Math.PI * 2;
+      var speed = 40 + Math.random() * 90;
+      particles.push({
+        x: x, y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 0.35 + Math.random() * 0.2,
+        maxLife: 0.55,
+        color: color
+      });
+    }
+  }
 
   function buildWave() {
     var rows = Math.min(3 + Math.floor(wave / 2), 6);
@@ -64,6 +90,7 @@
     ship = { x: W / 2 };
     playerBullets = [];
     enemyBullets = [];
+    particles = [];
     score = 0;
     lives = 3;
     wave = 1;
@@ -93,7 +120,25 @@
     return { x: e.baseX + group.offsetX, y: e.baseY + group.offsetY };
   }
 
+  function updateStars(dt) {
+    stars.forEach(function (s) {
+      s.y += s.speed * dt;
+      if (s.y > H) { s.y = -2; s.x = Math.random() * W; }
+    });
+  }
+
+  function updateParticles(dt) {
+    particles.forEach(function (p) {
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.life -= dt;
+    });
+    particles = particles.filter(function (p) { return p.life > 0; });
+  }
+
   function update(dt) {
+    updateStars(dt);
+    if (particles) updateParticles(dt);
     if (state !== "playing") return;
 
     if (leftPressed) ship.x -= SHIP_SPEED * dt;
@@ -107,6 +152,7 @@
     if (fireTimer >= FIRE_INTERVAL) {
       fireTimer = 0;
       playerBullets.push({ x: ship.x, y: SHIP_Y - SHIP_H / 2 });
+      GTBSfx.shoot();
     }
     playerBullets.forEach(function (b) { b.y -= BULLET_SPEED * dt; });
     playerBullets = playerBullets.filter(function (b) { return b.y > -10; });
@@ -159,6 +205,9 @@
       }
       if (hit) {
         hit.alive = false;
+        GTBSfx.explode();
+        var hp = enemyPos(hit);
+        spawnExplosion(hp.x + ENEMY_W / 2, hp.y + ENEMY_H / 2, hit.color);
         playerBullets.splice(i, 1);
         i--;
         score += 20;
@@ -190,6 +239,8 @@
   }
 
   function hitShip() {
+    GTBSfx.hit();
+    spawnExplosion(ship.x, SHIP_Y, "#3ddc84");
     lives--;
     livesEl.textContent = lives;
     invulnTimer = 1.4;
@@ -200,6 +251,7 @@
 
   function gameOver(reason) {
     state = "over";
+    GTBSfx.gameover();
     if (score > best) {
       best = score;
       bestEl.textContent = best;
@@ -229,20 +281,79 @@
     overlay.hidden = true;
   }
 
+  function drawStars() {
+    stars.forEach(function (s) {
+      ctx.fillStyle = "rgba(255,255,255," + (0.35 + s.r / 3) + ")";
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  function drawEnemy(e) {
+    var p = enemyPos(e);
+    var cx = p.x + ENEMY_W / 2;
+
+    // 안테나
+    ctx.strokeStyle = e.color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - 5, p.y);
+    ctx.lineTo(cx - 7, p.y - 5);
+    ctx.moveTo(cx + 5, p.y);
+    ctx.lineTo(cx + 7, p.y - 5);
+    ctx.stroke();
+
+    // 몸체 (둥근 사각형)
+    var r = 5;
+    ctx.fillStyle = e.color;
+    ctx.beginPath();
+    ctx.moveTo(p.x + r, p.y);
+    ctx.arcTo(p.x + ENEMY_W, p.y, p.x + ENEMY_W, p.y + ENEMY_H, r);
+    ctx.arcTo(p.x + ENEMY_W, p.y + ENEMY_H, p.x, p.y + ENEMY_H, r);
+    ctx.arcTo(p.x, p.y + ENEMY_H, p.x, p.y, r);
+    ctx.arcTo(p.x, p.y, p.x + ENEMY_W, p.y, r);
+    ctx.closePath();
+    ctx.fill();
+
+    // 아래쪽 그림자로 입체감
+    ctx.fillStyle = "rgba(0,0,0,0.18)";
+    ctx.fillRect(p.x + 2, p.y + ENEMY_H - 5, ENEMY_W - 4, 4);
+
+    // 눈
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.arc(p.x + 7, p.y + 8, 3.4, 0, Math.PI * 2);
+    ctx.arc(p.x + ENEMY_W - 7, p.y + 8, 3.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#0d1117";
+    ctx.beginPath();
+    ctx.arc(p.x + 7, p.y + 8, 1.5, 0, Math.PI * 2);
+    ctx.arc(p.x + ENEMY_W - 7, p.y + 8, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawParticles() {
+    particles.forEach(function (p) {
+      ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+      ctx.globalAlpha = 1;
+    });
+  }
+
   function render() {
     ctx.fillStyle = "#0d1117";
     ctx.fillRect(0, 0, W, H);
 
-    // 적
+    drawStars();
+
     enemies.forEach(function (e) {
       if (!e.alive) return;
-      var p = enemyPos(e);
-      ctx.fillStyle = e.color;
-      ctx.fillRect(p.x, p.y, ENEMY_W, ENEMY_H);
-      ctx.fillStyle = "#0d1117";
-      ctx.fillRect(p.x + 5, p.y + 5, 3, 3);
-      ctx.fillRect(p.x + ENEMY_W - 8, p.y + 5, 3, 3);
+      drawEnemy(e);
     });
+
+    drawParticles();
 
     // 총알
     ctx.fillStyle = "#7fd1ff";
@@ -257,11 +368,29 @@
     // 플레이어
     var flashHidden = invulnTimer > 0 && Math.floor(invulnTimer * 10) % 2 === 0;
     if (!flashHidden) {
+      // 엔진 불꽃
+      var flame = 5 + Math.sin(performance.now() / 60) * 3;
+      ctx.fillStyle = "#f5a623";
+      ctx.beginPath();
+      ctx.moveTo(ship.x - 5, SHIP_Y + SHIP_H / 2 - 2);
+      ctx.lineTo(ship.x + 5, SHIP_Y + SHIP_H / 2 - 2);
+      ctx.lineTo(ship.x, SHIP_Y + SHIP_H / 2 - 2 + flame);
+      ctx.closePath();
+      ctx.fill();
+
       ctx.fillStyle = "#3ddc84";
       ctx.beginPath();
       ctx.moveTo(ship.x, SHIP_Y - SHIP_H / 2);
       ctx.lineTo(ship.x - SHIP_W / 2, SHIP_Y + SHIP_H / 2);
       ctx.lineTo(ship.x + SHIP_W / 2, SHIP_Y + SHIP_H / 2);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = "#1f9d55";
+      ctx.beginPath();
+      ctx.moveTo(ship.x, SHIP_Y - 3);
+      ctx.lineTo(ship.x - 6, SHIP_Y + SHIP_H / 2);
+      ctx.lineTo(ship.x + 6, SHIP_Y + SHIP_H / 2);
       ctx.closePath();
       ctx.fill();
     }

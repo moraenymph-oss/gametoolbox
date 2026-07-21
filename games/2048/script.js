@@ -185,6 +185,7 @@
         occupantAtCell.value *= 2;
         occupantAtCell.merged = true;
         mergedIds[occupantAtCell.id] = true;
+        GTBSfx.merge();
         score += occupantAtCell.value;
         pendingRemovals.push({ id: tile.id, r: cell.r, c: cell.c });
         tiles = tiles.filter(function (t) { return t.id !== tile.id; });
@@ -229,6 +230,7 @@
     if (has2048) {
       wonAnnounced = true;
       state = "won";
+      GTBSfx.win();
       showOverlay(
         "🎉 2048 달성!",
         "축하합니다! 점수 " + score + "점. 계속 진행해서 더 높은 타일에 도전할 수 있습니다.",
@@ -244,6 +246,7 @@
     if (state === "won") return;
     if (!hasMergeAvailable()) {
       state = "over";
+      GTBSfx.gameover();
       showOverlay(
         "게임 오버",
         "더 이상 이동할 수 없습니다. 최종 점수 " + score + "점.",

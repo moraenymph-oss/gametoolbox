@@ -80,6 +80,7 @@
   }
 
   function loseLife() {
+    GTBSfx.explode();
     lives--;
     livesEl.textContent = lives;
     if (lives <= 0) {
@@ -92,6 +93,7 @@
 
   function gameOver() {
     state = "over";
+    GTBSfx.gameover();
     if (score > best) {
       best = score;
       bestEl.textContent = best;
@@ -104,6 +106,7 @@
 
   function winGame() {
     state = "won";
+    GTBSfx.win();
     if (score > best) {
       best = score;
       bestEl.textContent = best;
@@ -178,6 +181,7 @@
         ball.y + ball.r > b.y && ball.y - ball.r < b.y + b.h
       ) {
         b.alive = false;
+        GTBSfx.hit();
         score += 10;
         scoreEl.textContent = score;
         ball.vy *= -1;

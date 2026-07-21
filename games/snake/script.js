@@ -69,6 +69,7 @@
 
     snake.unshift(head);
     if (head.x === food.x && head.y === food.y) {
+      GTBSfx.eat();
       score += 10;
       scoreEl.textContent = score;
       if (score > best) {
@@ -106,6 +107,7 @@
 
   function gameOver() {
     state = "over";
+    GTBSfx.gameover();
     clearTimeout(timerId);
     showOverlay(
       "게임 오버",

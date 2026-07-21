@@ -223,6 +223,7 @@
       return;
     }
 
+    GTBSfx.select();
     reveal(r, c);
     checkWin();
   }
@@ -232,6 +233,7 @@
     var cell = cells[r][c];
     if (cell.revealed) return;
     cell.flagged = !cell.flagged;
+    GTBSfx.flag();
     flagCount += cell.flagged ? 1 : -1;
     updateCellDOM(r, c);
     updateMinesLeft();
@@ -239,6 +241,7 @@
 
   function loseGame(hitR, hitC) {
     state = "lost";
+    GTBSfx.explode();
     stopTimer();
     for (var r = 0; r < rows; r++) {
       for (var c = 0; c < cols; c++) {
@@ -258,6 +261,7 @@
   function checkWin() {
     if (revealedCount === rows * cols - totalMines) {
       state = "won";
+      GTBSfx.win();
       stopTimer();
       for (var r = 0; r < rows; r++) {
         for (var c = 0; c < cols; c++) {

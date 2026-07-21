@@ -63,6 +63,7 @@
 
   function finishTest() {
     state = "finished";
+    GTBSfx.win();
     var sum = times.reduce(function (a, b) { return a + b; }, 0);
     var avg = Math.round(sum / times.length);
     var best = Math.min.apply(null, times);
@@ -94,6 +95,7 @@
     if (state === "waiting") {
       clearTimers();
       state = "early";
+      GTBSfx.hit();
       setStage("state-early", "너무 빨리 눌렀어요! 다시 시도하세요");
       advanceTimeoutId = setTimeout(startRound, 1000);
       return;
@@ -101,6 +103,7 @@
 
     if (state === "ready") {
       var elapsed = Math.round(performance.now() - readyStartTime);
+      GTBSfx.select();
       times.push(elapsed);
       round++;
       statLast.textContent = elapsed + "ms";

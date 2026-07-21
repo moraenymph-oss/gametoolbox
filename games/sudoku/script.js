@@ -166,6 +166,7 @@
     if (state !== "playing" || !selected) return;
     var r = selected.r, c = selected.c;
     if (given[r][c]) return;
+    GTBSfx.select();
     grid[r][c] = num;
     renderBoard();
     checkWin();
@@ -247,6 +248,7 @@
       }
     }
     state = "won";
+    GTBSfx.win();
     stopTimer();
     showOverlay("🎉 완성!", "소요 시간 " + formatTime(seconds) + "만에 스도쿠를 완성했습니다!", [
       { label: "🔄 새 게임", action: function () { newGame(currentDiff); } }

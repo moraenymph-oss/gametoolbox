@@ -22,6 +22,9 @@
   var ctx = canvas.getContext("2d");
   var nextCanvas = document.getElementById("next-canvas");
   var nextCtx = nextCanvas.getContext("2d");
+  var holdCanvas = document.getElementById("hold-canvas");
+  var holdCtx = holdCanvas.getContext("2d");
+  var holdBox = document.getElementById("hold-box");
   var scoreEl = document.getElementById("score-value");
   var linesEl = document.getElementById("lines-value");
   var levelEl = document.getElementById("level-value");
@@ -36,8 +39,10 @@
   canvas.height = ROWS * CELL;
   nextCanvas.width = 4 * NEXT_CELL;
   nextCanvas.height = 4 * NEXT_CELL;
+  holdCanvas.width = 4 * NEXT_CELL;
+  holdCanvas.height = 4 * NEXT_CELL;
 
-  var board, current, next, bag;
+  var board, current, next, bag, holdType, canHold;
   var score, lines, level, state, rafId, lastTime, dropAcc;
   var best = Number(localStorage.getItem(BEST_KEY) || 0);
 
@@ -91,6 +96,8 @@
   function resetGame() {
     board = buildEmptyBoard();
     bag = null;
+    holdType = null;
+    canHold = true;
     score = 0;
     lines = 0;
     level = 1;
@@ -134,9 +141,32 @@
       if (!collides(rotated, current.x + kicks[i], current.y)) {
         current.cells = rotated;
         current.x += kicks[i];
+        GTBSfx.rotate();
         return;
       }
     }
+  }
+
+  function ghostY() {
+    var y = current.y;
+    while (!collides(current.cells, current.x, y + 1)) y++;
+    return y;
+  }
+
+  function holdPiece() {
+    if (state !== "playing" || !canHold) return;
+    GTBSfx.select();
+    if (holdType === null) {
+      holdType = current.type;
+      current = next;
+      next = spawnPiece(drawFromBag());
+    } else {
+      var swap = holdType;
+      holdType = current.type;
+      current = spawnPiece(swap);
+    }
+    canHold = false;
+    dropAcc = 0;
   }
 
   function softDrop() {
@@ -157,6 +187,7 @@
     }
     score += dist * 2;
     scoreEl.textContent = score;
+    GTBSfx.drop();
     lockPiece();
   }
 
@@ -177,6 +208,7 @@
     current = next;
     next = spawnPiece(drawFromBag());
     dropAcc = 0;
+    canHold = true;
 
     if (collides(current.cells, current.x, current.y)) {
       gameOver();
@@ -194,6 +226,7 @@
       }
     }
     if (cleared > 0) {
+      GTBSfx.clear();
       lines += cleared;
       score += LINE_SCORES[cleared] * level;
       level = 1 + Math.floor(lines / 10);
@@ -203,6 +236,7 @@
 
   function gameOver() {
     state = "over";
+    GTBSfx.gameover();
     if (score > best) {
       best = score;
       localStorage.setItem(BEST_KEY, String(best));
@@ -237,6 +271,30 @@
     context.fillRect(x + 1, y + 1, size - 2, size - 2);
   }
 
+  function drawGhostCell(context, x, y, size, color) {
+    context.strokeStyle = color;
+    context.globalAlpha = 0.55;
+    context.lineWidth = 2;
+    context.strokeRect(x + 2, y + 2, size - 4, size - 4);
+    context.globalAlpha = 1;
+  }
+
+  function drawPreview(context, canvasEl, piece) {
+    context.fillStyle = "#0d1117";
+    context.fillRect(0, 0, canvasEl.width, canvasEl.height);
+    if (!piece) return;
+    var shape = SHAPES[piece].cells;
+    var minR = Math.min.apply(null, shape.map(function (c) { return c[0]; }));
+    var maxR = Math.max.apply(null, shape.map(function (c) { return c[0]; }));
+    var minC = Math.min.apply(null, shape.map(function (c) { return c[1]; }));
+    var maxC = Math.max.apply(null, shape.map(function (c) { return c[1]; }));
+    var offR = (4 - (maxR - minR + 1)) / 2 - minR;
+    var offC = (4 - (maxC - minC + 1)) / 2 - minC;
+    shape.forEach(function (cell) {
+      drawCell(context, (cell[1] + offC) * NEXT_CELL, (cell[0] + offR) * NEXT_CELL, NEXT_CELL, SHAPES[piece].color);
+    });
+  }
+
   function render() {
     ctx.fillStyle = "#0d1117";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -248,6 +306,13 @@
     }
 
     if (current) {
+      var gy = ghostY();
+      current.cells.forEach(function (cell) {
+        var gr = gy + cell[0];
+        var gc = current.x + cell[1];
+        if (gr >= 0 && gy !== current.y) drawGhostCell(ctx, gc * CELL, gr * CELL, CELL, current.color);
+      });
+
       current.cells.forEach(function (cell) {
         var r2 = current.y + cell[0];
         var c2 = current.x + cell[1];
@@ -255,13 +320,8 @@
       });
     }
 
-    nextCtx.fillStyle = "#0d1117";
-    nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
-    if (next) {
-      next.cells.forEach(function (cell) {
-        drawCell(nextCtx, cell[1] * NEXT_CELL, cell[0] * NEXT_CELL, NEXT_CELL, next.color);
-      });
-    }
+    drawPreview(nextCtx, nextCanvas, next ? next.type : null);
+    drawPreview(holdCtx, holdCanvas, holdType);
   }
 
   function loop(ts) {
@@ -288,7 +348,12 @@
     else if (e.key === "ArrowDown" || e.key === "s") { e.preventDefault(); softDrop(); }
     else if (e.key === "ArrowUp" || e.key === "w") { e.preventDefault(); tryRotate(); }
     else if (e.key === " ") { e.preventDefault(); hardDrop(); }
+    else if (e.key === "c" || e.key === "C" || e.key === "Shift") { e.preventDefault(); holdPiece(); }
   });
+
+  if (holdBox) {
+    holdBox.addEventListener("click", holdPiece);
+  }
 
   function bindPadButton(id, action, repeat) {
     var btn = document.getElementById(id);

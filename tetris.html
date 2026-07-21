@@ -64,6 +64,11 @@
         </div>
 
         <div class="tetris-side">
+          <div id="hold-box" class="next-box hold-box" role="button" aria-label="블록 보류">
+            <span class="stat-label">보류 (C)</span>
+            <canvas id="hold-canvas"></canvas>
+          </div>
+
           <div class="next-box">
             <span class="stat-label">다음 블록</span>
             <canvas id="next-canvas"></canvas>
@@ -79,7 +84,7 @@
         </div>
       </div>
 
-      <p class="hint">💡 방향키로 이동·회전(↑)·소프트드롭(↓), 스페이스바로 즉시 떨어뜨리기. 모바일은 아래 버튼을 사용하세요.</p>
+      <p class="hint">💡 방향키로 이동·회전(↑)·소프트드롭(↓), 스페이스바로 즉시 떨어뜨리기, C키로 블록 보류. 반투명 테두리는 블록이 떨어질 위치(고스트)입니다.</p>
     </div>
   </section>
 
@@ -112,6 +117,7 @@
 </footer>
 
 <script src="assets/js/common.js"></script>
+<script src="assets/js/sfx.js"></script>
 <script src="games/tetris/script.js"></script>
 </body>
 </html>
