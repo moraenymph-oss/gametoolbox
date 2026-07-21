@@ -180,11 +180,28 @@ main {
 }
 
 /* ---------- 카드 (게임 목록) ---------- */
+.game-category {
+  margin-top: 2.2rem;
+}
+
+.game-category:first-of-type {
+  margin-top: 0;
+}
+
+.category-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin: 0 0 0.9rem;
+  color: var(--fg);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 .game-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 1.1rem;
-  margin-top: 1.5rem;
 }
 
 .game-card {
@@ -441,6 +458,50 @@ main {
 .result-label {
   font-size: 0.78rem;
   color: var(--fg-muted);
+}
+
+/* ---------- 게임 오버레이 (보드 위에 뜨는 결과 팝업: 2048/지뢰찾기 등) ---------- */
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 22, 30, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  border-radius: var(--radius);
+}
+
+.game-overlay[hidden] {
+  display: none;
+}
+
+.overlay-card {
+  background: var(--bg-elevated);
+  border-radius: var(--radius);
+  padding: 1.4rem;
+  width: min(88vw, 320px);
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.overlay-card h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1.3rem;
+}
+
+.overlay-card p {
+  margin: 0 0 0.9rem;
+  color: var(--fg-muted);
+  font-size: 0.9rem;
+}
+
+.overlay-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  margin-top: 0.9rem;
+  flex-wrap: wrap;
 }
 
 /* ---------- 반응형 ---------- */

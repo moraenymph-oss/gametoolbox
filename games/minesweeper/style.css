@@ -1,0 +1,120 @@
+/* 지뢰찾기 전용 스타일 (공통 패널/통계/결과 UI는 assets/css/common.css 참고) */
+
+.minesweeper-app {
+  margin-top: 1rem;
+}
+
+.difficulty-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  flex-wrap: wrap;
+}
+
+.difficulty-btn {
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--fg-muted);
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.difficulty-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(74, 108, 247, 0.1);
+}
+
+.board-scroll {
+  overflow-x: auto;
+  padding-bottom: 0.4rem;
+}
+
+.mine-board-wrap {
+  position: relative;
+  width: max-content;
+  margin: 0 auto;
+}
+
+.mine-board {
+  --cell-size: 30px;
+  display: grid;
+  gap: 2px;
+  background: var(--border);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.mine-board.difficulty-expert {
+  --cell-size: 24px;
+}
+
+.mine-cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 800;
+  border-radius: 3px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.mine-cell.revealed {
+  background: var(--bg);
+  box-shadow: none;
+  cursor: default;
+}
+
+.mine-cell.mine-hit {
+  background: var(--incorrect);
+  color: #fff;
+}
+
+.mine-cell.flagged {
+  background: var(--bg-elevated);
+}
+
+.mine-cell .n1 { color: #2f6fed; }
+.mine-cell .n2 { color: #1f9d55; }
+.mine-cell .n3 { color: #e0324b; }
+.mine-cell .n4 { color: #1e3a8a; }
+.mine-cell .n5 { color: #8a3b1e; }
+.mine-cell .n6 { color: #14848a; }
+.mine-cell .n7 { color: #1c1e26; }
+.mine-cell .n8 { color: #6b7280; }
+
+[data-theme="dark"] .mine-cell .n7 { color: #e9eaf0; }
+
+.difficulty-expert .mine-cell {
+  font-size: 0.8rem;
+}
+
+@media (max-width: 480px) {
+  .mine-board {
+    --cell-size: 26px;
+  }
+
+  .mine-cell {
+    font-size: 0.85rem;
+  }
+
+  .mine-board.difficulty-expert {
+    --cell-size: 22px;
+  }
+
+  .difficulty-expert .mine-cell {
+    font-size: 0.72rem;
+  }
+}
