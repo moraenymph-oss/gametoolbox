@@ -44,6 +44,7 @@
   border-radius: 8px;
   gap: 1px;
   overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
 }
 
 .su-cell {
@@ -58,6 +59,7 @@
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
 .su-cell.given {

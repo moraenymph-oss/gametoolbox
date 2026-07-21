@@ -24,10 +24,26 @@
   canvas.width = W;
   canvas.height = H;
 
-  var paddle, ball, bricks, score, lives, state, rafId;
+  var paddle, ball, bricks, score, lives, state, rafId, trail, particles;
   var best = Number(localStorage.getItem(BEST_KEY) || 0);
   var leftPressed = false, rightPressed = false;
   var lastTime = null;
+
+  function spawnBrickParticles(b) {
+    var cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+    for (var i = 0; i < 8; i++) {
+      var angle = Math.random() * Math.PI * 2;
+      var speed = 40 + Math.random() * 100;
+      particles.push({
+        x: cx, y: cy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 0.3 + Math.random() * 0.2,
+        maxLife: 0.5,
+        color: b.color
+      });
+    }
+  }
 
   function buildBricks() {
     bricks = [];
@@ -65,6 +81,8 @@
 
   function resetGame() {
     paddle = { x: (W - PADDLE_W) / 2, w: PADDLE_W, h: PADDLE_H };
+    trail = [];
+    particles = [];
     score = 0;
     lives = 3;
     state = "idle";
@@ -136,7 +154,18 @@
     overlay.hidden = true;
   }
 
+  function updateParticles(dt) {
+    particles.forEach(function (p) {
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.life -= dt;
+    });
+    particles = particles.filter(function (p) { return p.life > 0; });
+  }
+
   function update(dt) {
+    updateParticles(dt);
+
     if (leftPressed) paddle.x -= 320 * dt;
     if (rightPressed) paddle.x += 320 * dt;
     paddle.x = Math.max(0, Math.min(W - paddle.w, paddle.x));
@@ -144,9 +173,13 @@
     if (state === "idle") {
       ball.x = paddle.x + paddle.w / 2;
       ball.y = PADDLE_Y - BALL_R - 1;
+      trail = [];
       return;
     }
     if (state !== "playing") return;
+
+    trail.push({ x: ball.x, y: ball.y });
+    if (trail.length > 8) trail.shift();
 
     ball.x += ball.vx * dt;
     ball.y += ball.vy * dt;
@@ -182,6 +215,7 @@
       ) {
         b.alive = false;
         GTBSfx.hit();
+        spawnBrickParticles(b);
         score += 10;
         scoreEl.textContent = score;
         ball.vy *= -1;
@@ -194,22 +228,55 @@
     }
   }
 
+  function drawRoundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(x, y, w, h, r);
+    } else {
+      ctx.rect(x, y, w, h);
+    }
+  }
+
   function render() {
     ctx.fillStyle = "#0d1117";
     ctx.fillRect(0, 0, W, H);
 
     bricks.forEach(function (b) {
       if (!b.alive) return;
+      drawRoundRect(b.x, b.y, b.w, b.h, 3);
       ctx.fillStyle = b.color;
-      ctx.fillRect(b.x, b.y, b.w, b.h);
+      ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,0.22)";
+      ctx.fillRect(b.x + 2, b.y + 2, b.w - 4, b.h * 0.4);
     });
 
-    ctx.fillStyle = "#e9eaf0";
-    ctx.beginPath();
-    ctx.roundRect ? ctx.roundRect(paddle.x, PADDLE_Y, paddle.w, paddle.h, 4) : ctx.rect(paddle.x, PADDLE_Y, paddle.w, paddle.h);
+    particles.forEach(function (p) {
+      ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+      ctx.globalAlpha = 1;
+    });
+
+    trail.forEach(function (p, i) {
+      var a = ((i + 1) / trail.length) * 0.28;
+      ctx.fillStyle = "rgba(242,177,121," + a.toFixed(2) + ")";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, ball.r * 0.7, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    var pg = ctx.createLinearGradient(paddle.x, 0, paddle.x + paddle.w, 0);
+    pg.addColorStop(0, "#c9cdda");
+    pg.addColorStop(0.5, "#f4f5f9");
+    pg.addColorStop(1, "#c9cdda");
+    drawRoundRect(paddle.x, PADDLE_Y, paddle.w, paddle.h, 4);
+    ctx.fillStyle = pg;
     ctx.fill();
 
-    ctx.fillStyle = "#f2b179";
+    var bg = ctx.createRadialGradient(ball.x - 2, ball.y - 2, 0.5, ball.x, ball.y, ball.r);
+    bg.addColorStop(0, "#ffe1c2");
+    bg.addColorStop(1, "#f2b179");
+    ctx.fillStyle = bg;
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
     ctx.fill();

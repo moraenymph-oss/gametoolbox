@@ -21,6 +21,28 @@
 
   var snake, dir, nextDir, food, score, tickMs, timerId, state;
   var best = Number(localStorage.getItem(BEST_KEY) || 0);
+  var rafId = null;
+  var sparkles = [];
+
+  function lerpColor(c1, c2, t) {
+    var r = Math.round(c1[0] + (c2[0] - c1[0]) * t);
+    var g = Math.round(c1[1] + (c2[1] - c1[1]) * t);
+    var b = Math.round(c1[2] + (c2[2] - c1[2]) * t);
+    return "rgb(" + r + "," + g + "," + b + ")";
+  }
+
+  function spawnSparkles(gx, gy) {
+    var cx = gx * CELL + CELL / 2, cy = gy * CELL + CELL / 2;
+    for (var i = 0; i < 8; i++) {
+      var angle = (Math.PI * 2 * i) / 8;
+      sparkles.push({
+        x: cx, y: cy,
+        vx: Math.cos(angle) * 60,
+        vy: Math.sin(angle) * 60,
+        life: 0.35
+      });
+    }
+  }
 
   function randInt(n) {
     return Math.floor(Math.random() * n);
@@ -41,12 +63,13 @@
     score = 0;
     tickMs = 140;
     state = "playing";
+    sparkles = [];
     scoreEl.textContent = score;
     bestEl.textContent = best;
     placeFood();
     hideOverlay();
     scheduleTick();
-    render();
+    startRenderLoop();
   }
 
   function scheduleTick() {
@@ -70,6 +93,7 @@
     snake.unshift(head);
     if (head.x === food.x && head.y === food.y) {
       GTBSfx.eat();
+      spawnSparkles(food.x, food.y);
       score += 10;
       scoreEl.textContent = score;
       if (score > best) {
@@ -83,26 +107,116 @@
       snake.pop();
     }
 
-    render();
     scheduleTick();
   }
 
-  function render() {
-    ctx.fillStyle = "#0d1117";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  function roundedRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
 
-    ctx.fillStyle = "#e0324b";
+  function drawGrid() {
+    ctx.strokeStyle = "rgba(255,255,255,0.035)";
+    ctx.lineWidth = 1;
+    for (var i = 1; i < GRID; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * CELL, 0);
+      ctx.lineTo(i * CELL, canvas.height);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, i * CELL);
+      ctx.lineTo(canvas.width, i * CELL);
+      ctx.stroke();
+    }
+  }
+
+  var HEAD_COLOR = [61, 220, 132];
+  var TAIL_COLOR = [22, 74, 48];
+
+  function drawSnake() {
+    var len = snake.length;
+    for (var i = len - 1; i >= 0; i--) {
+      var seg = snake[i];
+      var t = len > 1 ? i / (len - 1) : 0;
+      ctx.fillStyle = lerpColor(HEAD_COLOR, TAIL_COLOR, t);
+      var pad = 1.5;
+      roundedRect(seg.x * CELL + pad, seg.y * CELL + pad, CELL - pad * 2, CELL - pad * 2, 5);
+      ctx.fill();
+    }
+
+    // 머리 눈
+    var head = snake[0];
+    var cx = head.x * CELL + CELL / 2, cy = head.y * CELL + CELL / 2;
+    var ex = dir.x * 4, ey = dir.y * 4;
+    var perpX = -dir.y * 4, perpY = dir.x * 4;
+    ctx.fillStyle = "#0d1117";
+    ctx.beginPath();
+    ctx.arc(cx + ex + perpX * 0.5, cy + ey + perpY * 0.5, 2, 0, Math.PI * 2);
+    ctx.arc(cx + ex - perpX * 0.5, cy + ey - perpY * 0.5, 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawFood(ts) {
+    var pulse = 1 + Math.sin(ts / 180) * 0.14;
     var fx = food.x * CELL + CELL / 2;
     var fy = food.y * CELL + CELL / 2;
+    ctx.fillStyle = "#e0324b";
     ctx.beginPath();
-    ctx.arc(fx, fy, CELL / 2.6, 0, Math.PI * 2);
+    ctx.arc(fx, fy, (CELL / 2.6) * pulse, 0, Math.PI * 2);
     ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,0.35)";
+    ctx.beginPath();
+    ctx.arc(fx - 2.5, fy - 2.5, 1.6, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
-    snake.forEach(function (seg, i) {
-      ctx.fillStyle = i === 0 ? "#3ddc84" : "#2a9d5c";
-      var pad = 1.5;
-      ctx.fillRect(seg.x * CELL + pad, seg.y * CELL + pad, CELL - pad * 2, CELL - pad * 2);
+  function updateSparkles(dt) {
+    sparkles.forEach(function (p) {
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.life -= dt;
     });
+    sparkles = sparkles.filter(function (p) { return p.life > 0; });
+  }
+
+  function drawSparkles() {
+    sparkles.forEach(function (p) {
+      ctx.globalAlpha = Math.max(0, p.life / 0.35);
+      ctx.fillStyle = "#f5d76e";
+      ctx.fillRect(p.x - 1.5, p.y - 1.5, 3, 3);
+      ctx.globalAlpha = 1;
+    });
+  }
+
+  var lastRenderTs = null;
+
+  function render(ts) {
+    ts = ts || 0;
+    var dt = lastRenderTs === null ? 0 : Math.min(0.05, (ts - lastRenderTs) / 1000);
+    lastRenderTs = ts;
+    updateSparkles(dt);
+
+    ctx.fillStyle = "#0d1117";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawGrid();
+    drawFood(ts);
+    drawSnake();
+    drawSparkles();
+  }
+
+  function startRenderLoop() {
+    if (rafId) cancelAnimationFrame(rafId);
+    lastRenderTs = null;
+    function loop(ts) {
+      render(ts);
+      rafId = requestAnimationFrame(loop);
+    }
+    rafId = requestAnimationFrame(loop);
   }
 
   function gameOver() {
