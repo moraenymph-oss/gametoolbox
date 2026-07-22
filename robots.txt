@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://moraenymph-oss.github.io/gametoolbox/sitemap.xml
+Sitemap: https://game.makewithai.kr/sitemap.xml
