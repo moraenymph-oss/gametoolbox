@@ -2,8 +2,8 @@
 (function () {
   "use strict";
 
-  var COLS = 10, ROWS = 20, CELL = 22;
-  var NEXT_CELL = 16;
+  var COLS = 10, ROWS = 20, CELL = 27;
+  var NEXT_CELL = 20;
   var BEST_KEY = "gtb-tetris-best";
 
   var SHAPES = {

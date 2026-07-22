@@ -3,7 +3,7 @@
   "use strict";
 
   var GRID = 18;
-  var CELL = 20;
+  var CELL = 26;
   var BEST_KEY = "gtb-snake-best";
 
   var canvas = document.getElementById("game-canvas");
@@ -61,15 +61,21 @@
     dir = { x: 1, y: 0 };
     nextDir = { x: 1, y: 0 };
     score = 0;
-    tickMs = 140;
-    state = "playing";
+    tickMs = 150;
+    state = "idle";
     sparkles = [];
     scoreEl.textContent = score;
     bestEl.textContent = best;
     placeFood();
     hideOverlay();
-    scheduleTick();
+    clearTimeout(timerId);
     startRenderLoop();
+  }
+
+  function startPlaying() {
+    if (state !== "idle") return;
+    state = "playing";
+    scheduleTick();
   }
 
   function scheduleTick() {
@@ -207,6 +213,18 @@
     drawFood(ts);
     drawSnake();
     drawSparkles();
+
+    if (state === "idle") {
+      ctx.fillStyle = "rgba(13,17,23,0.55)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#f2f3f8";
+      ctx.font = "700 " + Math.round(CELL * 0.85) + "px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("탭하거나 방향키를 눌러 시작", canvas.width / 2, canvas.height / 2);
+      ctx.textAlign = "start";
+      ctx.textBaseline = "alphabetic";
+    }
   }
 
   function startRenderLoop() {
@@ -264,6 +282,7 @@
     if (!d) return;
     if (dir.x === -d.x && dir.y === -d.y) return; // 역방향 진입 방지
     nextDir = d;
+    if (state === "idle") startPlaying();
   }
 
   window.addEventListener("keydown", function (e) {
@@ -291,6 +310,10 @@
       trySetDir(dy > 0 ? "ArrowDown" : "ArrowUp");
     }
   }, { passive: true });
+
+  canvas.addEventListener("click", function () {
+    if (state === "idle") startPlaying();
+  });
 
   restartBtnTop.addEventListener("click", resetGame);
 

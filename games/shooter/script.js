@@ -2,13 +2,13 @@
 (function () {
   "use strict";
 
-  var W = 340, H = 520;
-  var SHIP_W = 30, SHIP_H = 22, SHIP_Y = H - 42;
-  var SHIP_SPEED = 280;
-  var BULLET_SPEED = 420, FIRE_INTERVAL = 0.28;
-  var ENEMY_W = 24, ENEMY_H = 18, GAP_X = 12, GAP_Y = 14, ENEMY_TOP = 36;
-  var STEP_DOWN = 14;
-  var ENEMY_BULLET_SPEED = 210;
+  var W = 408, H = 624;
+  var SHIP_W = 36, SHIP_H = 26, SHIP_Y = H - 50;
+  var SHIP_SPEED = 336;
+  var BULLET_SPEED = 500, FIRE_INTERVAL = 0.28;
+  var ENEMY_W = 29, ENEMY_H = 22, GAP_X = 14, GAP_Y = 17, ENEMY_TOP = 44;
+  var STEP_DOWN = 17;
+  var ENEMY_BULLET_SPEED = 250;
   var BEST_KEY = "gtb-shooter-best";
   var ROW_COLORS = ["#e0324b", "#f2b179", "#3ddc84", "#4a6cf7", "#a78bfa", "#f5d76e"];
 

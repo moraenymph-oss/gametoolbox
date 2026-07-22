@@ -2,10 +2,10 @@
 (function () {
   "use strict";
 
-  var W = 320, H = 460;
-  var PADDLE_W = 74, PADDLE_H = 10, PADDLE_Y = H - 26;
-  var BALL_R = 6;
-  var ROWS = 6, COLS = 8, MARGIN = 8, GAP = 4, BRICK_TOP = 40, BRICK_H = 16;
+  var W = 384, H = 552;
+  var PADDLE_W = 90, PADDLE_H = 12, PADDLE_Y = H - 32;
+  var BALL_R = 7;
+  var ROWS = 6, COLS = 8, MARGIN = 10, GAP = 5, BRICK_TOP = 48, BRICK_H = 20;
   var BRICK_W = (W - MARGIN * 2 - GAP * (COLS - 1)) / COLS;
   var ROW_COLORS = ["#e0324b", "#f2b179", "#edc850", "#3ddc84", "#4a6cf7", "#a78bfa"];
   var BEST_KEY = "gtb-breakout-best";
@@ -73,7 +73,7 @@
 
   function launchBall() {
     var angle = (Math.random() * 80 - 40) * (Math.PI / 180); // -40~40도
-    var speed = 250;
+    var speed = 300;
     ball.vx = speed * Math.sin(angle);
     ball.vy = -speed * Math.cos(angle);
     state = "playing";
@@ -166,8 +166,8 @@
   function update(dt) {
     updateParticles(dt);
 
-    if (leftPressed) paddle.x -= 320 * dt;
-    if (rightPressed) paddle.x += 320 * dt;
+    if (leftPressed) paddle.x -= 384 * dt;
+    if (rightPressed) paddle.x += 384 * dt;
     paddle.x = Math.max(0, Math.min(W - paddle.w, paddle.x));
 
     if (state === "idle") {
@@ -199,7 +199,7 @@
     ) {
       var hitPos = (ball.x - (paddle.x + paddle.w / 2)) / (paddle.w / 2); // -1~1
       var angle = hitPos * (Math.PI / 3); // 최대 60도
-      var speed = Math.min(420, Math.hypot(ball.vx, ball.vy) * 1.02);
+      var speed = Math.min(500, Math.hypot(ball.vx, ball.vy) * 1.02);
       ball.vx = speed * Math.sin(angle);
       ball.vy = -Math.abs(speed * Math.cos(angle));
       ball.y = PADDLE_Y - ball.r - 1;
