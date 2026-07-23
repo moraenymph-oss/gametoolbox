@@ -116,7 +116,7 @@ a:hover {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 1.1rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
   font-size: 0.95rem;
 }
@@ -133,6 +133,31 @@ a:hover {
 .nav-links a.external {
   color: var(--accent);
   font-weight: 600;
+}
+
+.icon-link {
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--fg);
+  border-radius: 999px;
+  width: 2.3rem;
+  height: 2.3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  line-height: 1;
+  text-decoration: none;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.icon-link:hover {
+  background: var(--border);
+  text-decoration: none;
+}
+
+.icon-link:active {
+  transform: scale(0.94);
 }
 
 .theme-toggle {
