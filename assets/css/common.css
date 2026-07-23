@@ -316,6 +316,11 @@ main {
   background: rgba(74, 108, 247, 0.1);
 }
 
+.btn-outline.active {
+  background: var(--accent);
+  color: #fff;
+}
+
 /* ---------- 광고 영역 ---------- */
 .ad-slot {
   border: 1px dashed var(--border);

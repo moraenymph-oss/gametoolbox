@@ -20,14 +20,26 @@
   var restartBtnTop = document.getElementById("restart-btn-top");
   var difficultyBtns = Array.prototype.slice.call(document.querySelectorAll(".difficulty-btn"));
   var numberPad = document.getElementById("number-pad");
+  var noteToggleBtn = document.getElementById("note-toggle-btn");
 
   var currentDiff = "easy";
-  var solution, puzzle, grid, given;
+  var solution, puzzle, grid, given, notes;
   var cellEls = [];
   var selected = null;
   var hintsLeft = HINTS_TOTAL;
   var seconds = 0, timerInterval = null;
   var state = "playing";
+  var noteMode = false;
+
+  function makeEmptyNotes() {
+    var n = [];
+    for (var r = 0; r < 9; r++) {
+      var row = [];
+      for (var c = 0; c < 9; c++) row.push({});
+      n.push(row);
+    }
+    return n;
+  }
 
   function makeEmptyGrid() {
     var g = [];
@@ -166,8 +178,18 @@
     if (state !== "playing" || !selected) return;
     var r = selected.r, c = selected.c;
     if (given[r][c]) return;
+
+    if (noteMode) {
+      if (grid[r][c]) return;
+      notes[r][c][num] = !notes[r][c][num];
+      GTBSfx.select();
+      renderBoard();
+      return;
+    }
+
     GTBSfx.select();
     grid[r][c] = num;
+    notes[r][c] = {};
     renderBoard();
     checkWin();
   }
@@ -177,6 +199,7 @@
     var r = selected.r, c = selected.c;
     if (given[r][c]) return;
     grid[r][c] = 0;
+    notes[r][c] = {};
     renderBoard();
   }
 
@@ -185,11 +208,17 @@
     var r = selected.r, c = selected.c;
     if (given[r][c]) return;
     grid[r][c] = solution[r][c];
+    notes[r][c] = {};
     hintsLeft--;
     hintsEl.textContent = hintsLeft;
     hintBtn.disabled = hintsLeft <= 0;
     renderBoard();
     checkWin();
+  }
+
+  function toggleNoteMode() {
+    noteMode = !noteMode;
+    noteToggleBtn.classList.toggle("active", noteMode);
   }
 
   function hasConflict(r, c) {
@@ -209,13 +238,37 @@
     return false;
   }
 
+  function renderNotes(el, noteSet) {
+    var hasAny = false;
+    for (var n = 1; n <= 9; n++) {
+      if (noteSet[n]) { hasAny = true; break; }
+    }
+    if (!hasAny) {
+      el.textContent = "";
+      return;
+    }
+    el.innerHTML = "";
+    var grid9 = document.createElement("div");
+    grid9.className = "su-notes";
+    for (var i = 1; i <= 9; i++) {
+      var span = document.createElement("span");
+      span.textContent = noteSet[i] ? String(i) : "";
+      grid9.appendChild(span);
+    }
+    el.appendChild(grid9);
+  }
+
   function renderBoard() {
     var selNum = selected ? grid[selected.r][selected.c] : 0;
     for (var r = 0; r < 9; r++) {
       for (var c = 0; c < 9; c++) {
         var el = cellEls[r][c];
         var num = grid[r][c];
-        el.textContent = num ? String(num) : "";
+        if (num) {
+          el.textContent = String(num);
+        } else {
+          renderNotes(el, notes[r][c]);
+        }
         el.classList.remove("given", "selected", "peer", "same-number", "conflict");
         if (given[r][c]) el.classList.add("given");
 
@@ -308,11 +361,14 @@
     puzzle = gen.puzzle;
     grid = puzzle.map(function (row) { return row.slice(); });
     given = puzzle.map(function (row) { return row.map(function (v) { return v !== 0; }); });
+    notes = makeEmptyNotes();
 
     selected = null;
     hintsLeft = HINTS_TOTAL;
     seconds = 0;
     state = "playing";
+    noteMode = false;
+    noteToggleBtn.classList.remove("active");
 
     hintsEl.textContent = hintsLeft;
     hintBtn.disabled = false;
@@ -332,7 +388,12 @@
   });
 
   window.addEventListener("keydown", function (e) {
-    if (state !== "playing" || !selected) return;
+    if (state !== "playing") return;
+    if (e.key === "n" || e.key === "N") {
+      toggleNoteMode();
+      return;
+    }
+    if (!selected) return;
     if (e.key >= "1" && e.key <= "9") {
       setNumber(Number(e.key));
     } else if (e.key === "Backspace" || e.key === "Delete" || e.key === "0") {
@@ -353,6 +414,7 @@
   });
 
   hintBtn.addEventListener("click", useHint);
+  noteToggleBtn.addEventListener("click", toggleNoteMode);
 
   difficultyBtns.forEach(function (btn) {
     btn.addEventListener("click", function () {

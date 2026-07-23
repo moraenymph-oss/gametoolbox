@@ -206,10 +206,44 @@
     }
   }
 
+  function chord(r, c) {
+    var cell = cells[r][c];
+    var around = neighbors(r, c);
+    var flagged = around.filter(function (pos) {
+      return cells[pos[0]][pos[1]].flagged;
+    });
+    if (flagged.length !== cell.adjacent) return;
+
+    var targets = around.filter(function (pos) {
+      var ncell = cells[pos[0]][pos[1]];
+      return !ncell.flagged && !ncell.revealed;
+    });
+    if (targets.length === 0) return;
+
+    var hitMine = targets.find(function (pos) {
+      return cells[pos[0]][pos[1]].mine;
+    });
+    if (hitMine) {
+      loseGame(hitMine[0], hitMine[1]);
+      return;
+    }
+
+    GTBSfx.select();
+    targets.forEach(function (pos) {
+      reveal(pos[0], pos[1]);
+    });
+    checkWin();
+  }
+
   function handleOpen(r, c) {
     if (state === "won" || state === "lost") return;
     var cell = cells[r][c];
-    if (cell.flagged || cell.revealed) return;
+
+    if (cell.revealed) {
+      if (cell.adjacent > 0) chord(r, c);
+      return;
+    }
+    if (cell.flagged) return;
 
     if (!firstClickDone) {
       placeMines(r, c);

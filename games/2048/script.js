@@ -15,6 +15,7 @@
   var overlayDesc = document.getElementById("overlay-desc");
   var overlayActions = document.getElementById("overlay-actions");
   var restartBtnTop = document.getElementById("restart-btn-top");
+  var undoBtn = document.getElementById("undo-btn");
   var boardEl = document.getElementById("board-2048");
 
   var tiles = [];
@@ -25,6 +26,19 @@
   var wonAnnounced = false;
   var cellSize = 0;
   var pendingRemovals = [];
+  var previousState = null;
+
+  function snapshotState() {
+    return {
+      tiles: tiles.map(function (t) { return { id: t.id, value: t.value, r: t.r, c: t.c }; }),
+      score: score,
+      nextId: nextId
+    };
+  }
+
+  function updateUndoButton() {
+    undoBtn.disabled = !previousState || state !== "playing";
+  }
 
   function buildGridBg() {
     gridBg.innerHTML = "";
@@ -132,7 +146,7 @@
       var rx = rm.c * (cellSize + GAP);
       var ry = rm.r * (cellSize + GAP);
       el.style.transform = "translate(" + rx + "px," + ry + "px)";
-      setTimeout(function () { el.remove(); }, 130);
+      setTimeout(function () { el.remove(); }, 150);
     });
     pendingRemovals = [];
 
@@ -155,6 +169,7 @@
 
   function move(dirKey) {
     if (state !== "playing") return;
+    var snapshot = snapshotState();
     var vec = DIRS[dirKey];
     var sorted = tiles.slice().sort(function (a, b) {
       if (vec.dr !== 0) return vec.dr > 0 ? b.r - a.r : a.r - b.r;
@@ -199,6 +214,9 @@
 
     if (!moved) return;
 
+    previousState = snapshot;
+    updateUndoButton();
+
     if (score > best) {
       best = score;
       localStorage.setItem(BEST_KEY, String(best));
@@ -208,6 +226,20 @@
     render();
     checkWin();
     checkGameOver();
+  }
+
+  function undoMove() {
+    if (!previousState || state !== "playing") return;
+    tiles = previousState.tiles.map(function (t) {
+      return { id: t.id, value: t.value, r: t.r, c: t.c, isNew: false, merged: false };
+    });
+    score = previousState.score;
+    nextId = previousState.nextId;
+    previousState = null;
+    pendingRemovals = [];
+    tileLayer.innerHTML = "";
+    updateUndoButton();
+    render();
   }
 
   function hasMergeAvailable() {
@@ -230,12 +262,13 @@
     if (has2048) {
       wonAnnounced = true;
       state = "won";
+      updateUndoButton();
       GTBSfx.win();
       showOverlay(
         "🎉 2048 달성!",
         "축하합니다! 점수 " + score + "점. 계속 진행해서 더 높은 타일에 도전할 수 있습니다.",
         [
-          { label: "계속하기", primary: false, action: function () { hideOverlay(); state = "playing"; } },
+          { label: "계속하기", primary: false, action: function () { hideOverlay(); state = "playing"; updateUndoButton(); } },
           { label: "🔄 다시 하기", primary: true, action: resetGame }
         ]
       );
@@ -246,6 +279,7 @@
     if (state === "won") return;
     if (!hasMergeAvailable()) {
       state = "over";
+      updateUndoButton();
       GTBSfx.gameover();
       showOverlay(
         "게임 오버",
@@ -281,8 +315,10 @@
     state = "playing";
     wonAnnounced = false;
     pendingRemovals = [];
+    previousState = null;
     tileLayer.innerHTML = "";
     hideOverlay();
+    updateUndoButton();
     spawnTile();
     spawnTile();
     render();
@@ -321,6 +357,7 @@
   });
 
   restartBtnTop.addEventListener("click", resetGame);
+  undoBtn.addEventListener("click", undoMove);
 
   buildGridBg();
   resetGame();
